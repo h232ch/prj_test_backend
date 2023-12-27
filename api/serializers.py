@@ -12,7 +12,6 @@ from users.models import MyUser
 
 class BoardSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
-
     class Meta:
         model = Board
         fields = ['id', 'user', 'email', 'title', 'content', 'published',]
