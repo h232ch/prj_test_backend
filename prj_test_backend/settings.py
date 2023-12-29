@@ -128,8 +128,6 @@ AUTH_USER_MODEL = 'users.MyUser'
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:4200",
-    # "http://172.23.140.110:4200",
-    # "http://172.23.244.110:4200",
 ]
 
 REST_FRAMEWORK = {
