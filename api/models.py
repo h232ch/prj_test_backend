@@ -14,3 +14,11 @@ class Board(models.Model):
     def __str__(self):
         return self.title
 
+
+class BoardComment(models.Model):
+    board = models.ForeignKey(Board, related_name='comments', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, null=True)
+    comment = models.TextField(max_length=256)
+    published = models.DateTimeField(null=True)
+
+
