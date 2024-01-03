@@ -4,21 +4,34 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from api.models import Board, BoardComment
+from api.models import Board, BoardComment, BoardChildComment
 from users.models import MyUser
 
 
-class BoardCommentSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source='user.username')
+class BoardChildCommentSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.id')
     email = serializers.EmailField(source='user.email', read_only=True)
 
     class Meta:
+        model = BoardChildComment
+        # fields = {'id', 'user', 'child_comments', 'published'}
+        # fields = ['id', 'user', 'email', 'comment', 'published', 'p_comment']
+        fields = ('__all__')
+
+
+class BoardCommentSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.id')
+    email = serializers.EmailField(source='user.email', read_only=True)
+    child_comments = BoardChildCommentSerializer(many=True, read_only=True)
+
+    class Meta:
         model = BoardComment
-        fields = ('id', 'user', 'email', 'board', 'comment', 'published')
+        fields = ['id', 'user', 'email', 'board', 'comment', 'published', 'child_comments']
 
 
 class BoardSerializer(serializers.ModelSerializer):
     # the user field should be changed like board comment serializer
+    user = serializers.ReadOnlyField(source='user.id')
     email = serializers.EmailField(source='user.email', read_only=True)
     comments = BoardCommentSerializer(many=True, read_only=True)
 

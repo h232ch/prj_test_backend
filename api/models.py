@@ -22,3 +22,8 @@ class BoardComment(models.Model):
     published = models.DateTimeField(null=True)
 
 
+class BoardChildComment(models.Model):
+    p_comment = models.ForeignKey(BoardComment, related_name='child_comments', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, null=True)
+    comment = models.TextField(max_length=256)
+    published = models.DateTimeField(null=True)

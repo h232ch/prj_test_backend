@@ -7,14 +7,15 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from api.models import Board, BoardComment
+from api.models import Board, BoardComment, BoardChildComment
 from api.permissions import IsOwnerOrReadOnly
-from api.serializers import BoardSerializer, UserSerializer, CustomTokenObtainPairSerializer, BoardCommentSerializer
+from api.serializers import BoardSerializer, UserSerializer, CustomTokenObtainPairSerializer, BoardCommentSerializer, \
+    BoardChildCommentSerializer
 from users.models import MyUser
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 4  # Set the number of items per page
+    page_size = 5  # Set the number of items per page
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -23,8 +24,11 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.order_by("-published").all()
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
     pagination_class = CustomPagination
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['post'])
     def search_data(self, request):
@@ -57,7 +61,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         # Paginate the queryset
         paginated_queryset = self.paginate_queryset(queryset)
         serializer = self.get_serializer(paginated_queryset, many=True)
-
         return self.get_paginated_response(serializer.data)
 
 
@@ -81,11 +84,21 @@ class MyTokenObtainPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
 
 
-class BoardCommentSet(viewsets.ModelViewSet):
+class BoardCommentViewSet(viewsets.ModelViewSet):
     queryset = BoardComment.objects.order_by("-published").all()
     serializer_class = BoardCommentSerializer
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class BoardChildCommentViewSet(viewsets.ModelViewSet):
+    queryset = BoardChildComment.objects.order_by("-published").all()
+    serializer_class = BoardChildCommentSerializer
+    authentication_classes = (JWTAuthentication,)
+    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
