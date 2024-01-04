@@ -24,7 +24,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.order_by("-published").all()
     authentication_classes = (JWTAuthentication,)
-    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
     pagination_class = CustomPagination
 
     def perform_create(self, serializer):
@@ -88,7 +88,7 @@ class BoardCommentViewSet(viewsets.ModelViewSet):
     queryset = BoardComment.objects.order_by("-published").all()
     serializer_class = BoardCommentSerializer
     authentication_classes = (JWTAuthentication,)
-    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -98,7 +98,7 @@ class BoardChildCommentViewSet(viewsets.ModelViewSet):
     queryset = BoardChildComment.objects.order_by("-published").all()
     serializer_class = BoardChildCommentSerializer
     authentication_classes = (JWTAuthentication,)
-    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
