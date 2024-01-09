@@ -2,20 +2,21 @@ from django.db.models import Q
 from rest_framework import viewsets, mixins, generics, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from api.models import Board, BoardComment, BoardChildComment
+from api.models import Board, BoardComment, BoardChildComment, Image, CommentImage
 from api.permissions import IsOwnerOrReadOnly
 from api.serializers import BoardSerializer, UserSerializer, CustomTokenObtainPairSerializer, BoardCommentSerializer, \
-    BoardChildCommentSerializer
+    BoardChildCommentSerializer, ImageSerializer, CommentImageSerializer
 from users.models import MyUser
 
 
 class CustomPagination(PageNumberPagination):
-    page_size = 5  # Set the number of items per page
+    page_size = 7  # Set the number of items per page
     page_size_query_param = 'page_size'
     max_page_size = 100
 
@@ -24,8 +25,9 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.order_by("-published").all()
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
     pagination_class = CustomPagination
+    parser_classes = (MultiPartParser, FormParser)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -38,7 +40,6 @@ class BoardViewSet(viewsets.ModelViewSet):
         if not search:
             return Response({'detail': 'Please provide search_data in the request data.'},
                             status=status.HTTP_400_BAD_REQUEST)
-
         queryset = Board.objects.filter(
             Q(title__icontains=search)
         ).order_by("-published")
@@ -88,7 +89,7 @@ class BoardCommentViewSet(viewsets.ModelViewSet):
     queryset = BoardComment.objects.order_by("-published").all()
     serializer_class = BoardCommentSerializer
     authentication_classes = (JWTAuthentication,)
-    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
+    # permission_classes = (IsAuthenticated, IsOwnerOrReadOnly | IsAdminUser)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -102,3 +103,14 @@ class BoardChildCommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class ImageViewSet(viewsets.ModelViewSet):
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
+
+
+class CommentImageViewSet(viewsets.ModelViewSet):
+    queryset = (CommentImage.objects.all())
+    serializer_class = CommentImageSerializer
+
